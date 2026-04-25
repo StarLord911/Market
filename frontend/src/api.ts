@@ -1,4 +1,4 @@
-import type { Listing, User } from './types';
+import type { Comment, Listing, User } from './types';
 
 const json = { 'Content-Type': 'application/json' };
 
@@ -32,6 +32,13 @@ export const api = {
       return fetch(`/api/listings/${id}/photos`, { method: 'POST', body: form })
         .then(handle<Listing>);
     },
+  },
+  comments: {
+    list: (listingId: string) =>
+      fetch(`/api/listings/${listingId}/comments`).then(handle<Comment[]>),
+    create: (listingId: string, data: { authorId: string; authorName: string; text: string }) =>
+      fetch(`/api/listings/${listingId}/comments`, { method: 'POST', headers: json, body: JSON.stringify(data) })
+        .then(handle<Comment>),
   },
   users: {
     list: () => fetch('/api/users').then(handle<User[]>),

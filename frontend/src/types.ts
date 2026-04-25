@@ -18,6 +18,15 @@ export type User = {
   registeredAt: string;
 };
 
+export type Comment = {
+  id: string;
+  listingId: string;
+  authorId: string;
+  authorName: string;
+  text: string;
+  createdAt: string;
+};
+
 export type CurrentUser = {
   id: string;
   username: string;

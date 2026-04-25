@@ -18,3 +18,18 @@ public record CreateListingRequest(
     string Description,
     decimal Price,
     string Category);
+
+// DTO комментария к объявлению
+public record CommentDto(
+    Guid Id,
+    Guid ListingId,
+    Guid AuthorId,
+    string AuthorName,
+    string Text,
+    DateTime CreatedAt);
+
+// Запрос на добавление комментария
+public record CreateCommentRequest(
+    Guid AuthorId,
+    string AuthorName,
+    string Text);

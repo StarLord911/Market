@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api';
 import { auth } from '../auth';
-import type { Listing, User } from '../types';
+import type { Comment, Listing, User } from '../types';
 import { formatDate, formatPrice, initial } from '../utils';
 
 export default function ListingDetail() {
@@ -12,6 +12,13 @@ export default function ListingDetail() {
   const [author, setAuthor] = useState<User | null>(null);
   const [activePhoto, setActivePhoto] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentText, setCommentText] = useState('');
+  const [commentError, setCommentError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const me = auth.get();
 
   useEffect(() => {
@@ -22,6 +29,8 @@ export default function ListingDetail() {
         try { setAuthor(await api.users.get(l.authorId)); } catch { /* ignore */ }
       })
       .catch(() => setListing(null));
+
+    api.comments.list(id).then(setComments).catch(() => {});
   }, [id]);
 
   if (listing === undefined) return <div className="loading-page"><span className="spinner" /></div>;
@@ -33,12 +42,33 @@ export default function ListingDetail() {
     catch (e) { setError((e as Error).message); }
   };
 
+  const onComment = async () => {
+    if (!me) { setCommentError('Войдите, чтобы оставить комментарий'); return; }
+    if (!commentText.trim()) { setCommentError('Комментарий не может быть пустым'); return; }
+    setSubmitting(true);
+    setCommentError(null);
+    try {
+      const c = await api.comments.create(listing.id, {
+        authorId: me.id,
+        authorName: me.username,
+        text: commentText.trim(),
+      });
+      setComments(prev => [...prev, c]);
+      setCommentText('');
+      textareaRef.current?.focus();
+    } catch (e) {
+      setCommentError((e as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const isOwner = me?.id === listing.authorId;
   const photos = listing.photos ?? [];
 
   return (
     <div className="detail">
-      {/* Left: gallery */}
+      {/* Left: gallery + comments */}
       <div>
         {photos.length > 0 ? (
           <>
@@ -60,6 +90,54 @@ export default function ListingDetail() {
         ) : (
           <div className="detail-img">{initial(listing.title)}</div>
         )}
+
+        {/* Comments */}
+        <div className="comments">
+          <h3 style={{ marginBottom: 16 }}>
+            Комментарии {comments.length > 0 && <span className="comments__count">{comments.length}</span>}
+          </h3>
+
+          {comments.length === 0 && (
+            <div className="comments__empty">Комментариев пока нет — будьте первым!</div>
+          )}
+
+          <div className="comments__list">
+            {comments.map(c => (
+              <div key={c.id} className="comment">
+                <div className="comment__avatar">{c.authorName[0].toUpperCase()}</div>
+                <div className="comment__body">
+                  <div className="comment__header">
+                    <span className="comment__author">{c.authorName}</span>
+                    <span className="comment__date">{formatDate(c.createdAt)}</span>
+                  </div>
+                  <div className="comment__text">{c.text}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="comment-form">
+            <textarea
+              ref={textareaRef}
+              className="comment-form__input"
+              placeholder={me ? 'Напишите комментарий…' : 'Войдите, чтобы оставить комментарий'}
+              value={commentText}
+              onChange={e => setCommentText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) onComment(); }}
+              disabled={!me || submitting}
+              rows={3}
+            />
+            {commentError && <div className="error" style={{ marginTop: 8 }}>{commentError}</div>}
+            <button
+              className="btn primary sm"
+              style={{ marginTop: 10, alignSelf: 'flex-end' }}
+              onClick={onComment}
+              disabled={!me || submitting || !commentText.trim()}
+            >
+              {submitting ? 'Отправка…' : 'Отправить'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Right: info */}
@@ -71,7 +149,6 @@ export default function ListingDetail() {
         <div className="detail-price">{formatPrice(listing.price)}</div>
         <div className="detail-desc">{listing.description}</div>
 
-        {/* Seller block */}
         {author ? (
           <div className="seller-card">
             <Link to={`/users/${author.id}`} className="seller-card__top">

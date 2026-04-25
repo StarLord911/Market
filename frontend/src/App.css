@@ -420,7 +420,7 @@
 }
 
 .detail-img {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 10 / 7;
   background: var(--surface);
   border-radius: 20px;
   display: flex;
@@ -431,6 +431,120 @@
   color: #d0d0d0;
   letter-spacing: -0.04em;
 }
+
+/* comments */
+.comments {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.comments__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.comments__empty {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 12px 0;
+}
+
+.comments__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.comment {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.comment__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.comment__body {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.comment__header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.comment__author {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.comment__date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.comment__text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-form__input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s;
+  color: var(--text);
+}
+
+.comment-form__input:focus { border-color: var(--text); }
+.comment-form__input:disabled { background: var(--surface); color: var(--muted); cursor: not-allowed; }
 
 .detail-side { display: flex; flex-direction: column; gap: 16px; }
 .detail-side h1 { font-size: 26px; line-height: 1.2; }
