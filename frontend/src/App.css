@@ -361,6 +361,7 @@
 }
 
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   border-radius: var(--radius);
@@ -383,6 +384,53 @@
   color: #d0d0d0;
   letter-spacing: -0.04em;
 }
+
+/* favorite button on card */
+.fav-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(4px);
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  transition: transform .15s, color .15s, background .15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  z-index: 1;
+}
+
+.fav-btn:hover { transform: scale(1.15); background: #fff; }
+.fav-btn--active { color: #e03d3d; }
+
+/* favorite button on detail page */
+.fav-btn-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+  white-space: nowrap;
+}
+
+.fav-btn-detail span { font-size: 13px; font-weight: 500; }
+.fav-btn-detail:hover { border-color: #e03d3d; color: #e03d3d; }
+.fav-btn-detail--active { border-color: #e03d3d; color: #e03d3d; background: #fff5f5; }
 
 .card-body { padding: 12px 4px 4px; }
 
@@ -606,8 +654,12 @@
 
 /* user list / profile */
 .user-card {
-  display: flex; align-items: center; gap: 16px;
-  padding: 16px; border: 1px solid var(--border); border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   margin-bottom: 32px;
 }
 .user-card .avatar { width: 56px; height: 56px; font-size: 20px; }

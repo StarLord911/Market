@@ -32,6 +32,7 @@ builder.Services.AddMassTransit(x =>
 
 builder.Services.AddScoped<IListingsService, ListingsService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
+builder.Services.AddScoped<IFavoritesService, FavoritesService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 

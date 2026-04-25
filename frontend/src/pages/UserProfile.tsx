@@ -51,7 +51,7 @@ export default function UserProfile() {
 
   return (
     <>
-      <div className="user-card" style={{ alignItems: 'flex-start', gap: 20 }}>
+      <div className="user-card" style={{ alignItems: 'flex-start', gap: 20, marginTop: 32, padding: 24 }}>
         <div className="avatar" style={{ width: 64, height: 64, fontSize: 24, flexShrink: 0 }}>
           {initial(user.username)}
         </div>

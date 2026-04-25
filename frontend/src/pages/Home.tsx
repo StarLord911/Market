@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
-import type { Listing } from '../types';
 import ListingCard from '../components/ListingCard';
+import { useFavorites } from '../hooks/useFavorites';
+import type { Listing } from '../types';
 
 export default function Home() {
   const [items, setItems] = useState<Listing[] | null>(null);
+  const { ids, toggle } = useFavorites();
 
   useEffect(() => {
     api.listings.list().then(setItems).catch(() => setItems([]));
@@ -33,7 +35,14 @@ export default function Home() {
         )}
         {items && items.length > 0 && (
           <div className="grid">
-            {items.slice(0, 12).map(l => <ListingCard key={l.id} listing={l} />)}
+            {items.slice(0, 12).map(l => (
+              <ListingCard
+                key={l.id}
+                listing={l}
+                isFavorited={ids.has(l.id)}
+                onToggleFavorite={toggle}
+              />
+            ))}
           </div>
         )}
       </section>

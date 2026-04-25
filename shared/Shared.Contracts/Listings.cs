@@ -33,3 +33,6 @@ public record CreateCommentRequest(
     Guid AuthorId,
     string AuthorName,
     string Text);
+
+// Запрос на добавление объявления в избранное
+public record AddFavoriteRequest(Guid UserId);

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api';
 import { auth } from '../auth';
+import { useFavorites } from '../hooks/useFavorites';
 import type { Comment, Listing, User } from '../types';
 import { formatDate, formatPrice, initial } from '../utils';
 
@@ -20,6 +21,7 @@ export default function ListingDetail() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const me = auth.get();
+  const { ids: favIds, toggle: toggleFav } = useFavorites();
 
   useEffect(() => {
     if (!id) return;
@@ -146,7 +148,19 @@ export default function ListingDetail() {
           <span className="chip chip--sm">{listing.category}</span>
         </div>
         <h1>{listing.title}</h1>
-        <div className="detail-price">{formatPrice(listing.price)}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div className="detail-price">{formatPrice(listing.price)}</div>
+          {me && (
+            <button
+              className={`fav-btn-detail${favIds.has(listing.id) ? ' fav-btn-detail--active' : ''}`}
+              onClick={() => toggleFav(listing.id)}
+              title={favIds.has(listing.id) ? 'Убрать из избранного' : 'В избранное'}
+            >
+              {favIds.has(listing.id) ? '♥' : '♡'}
+              <span>{favIds.has(listing.id) ? 'В избранном' : 'В избранное'}</span>
+            </button>
+          )}
+        </div>
         <div className="detail-desc">{listing.description}</div>
 
         {author ? (

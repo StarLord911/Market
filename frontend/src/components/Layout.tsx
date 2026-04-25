@@ -39,6 +39,7 @@ export default function Layout() {
           <nav className="nav">
             {user ? (
               <>
+                <NavLink to="/favorites">♡ Избранное</NavLink>
                 <NavLink to={`/users/${user.id}`}>{user.username}</NavLink>
                 <button onClick={() => { auth.clear(); navigate('/'); }}>Выйти</button>
                 <Link to="/listings/new" className="primary">+ Разместить</Link>

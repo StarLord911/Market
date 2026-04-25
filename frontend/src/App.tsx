@@ -8,6 +8,7 @@ import NewListing from './pages/NewListing';
 import Register from './pages/Register';
 import UserProfile from './pages/UserProfile';
 import Users from './pages/Users';
+import Favorites from './pages/Favorites';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="register" element={<Register />} />
           <Route path="users" element={<Users />} />
           <Route path="users/:id" element={<UserProfile />} />
+          <Route path="favorites" element={<Favorites />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

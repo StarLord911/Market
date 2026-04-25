@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api';
+import ListingCard from '../components/ListingCard';
+import { useFavorites } from '../hooks/useFavorites';
 import type { Listing } from '../types';
 import { CATEGORIES } from '../types';
-import ListingCard from '../components/ListingCard';
 
 export default function Listings() {
   const [items, setItems] = useState<Listing[] | null>(null);
   const [params, setParams] = useSearchParams();
+  const { ids, toggle } = useFavorites();
   const q = params.get('q')?.toLowerCase() ?? '';
   const activeCategory = params.get('category') ?? '';
 
@@ -54,7 +56,14 @@ export default function Listings() {
       {filtered?.length === 0 && <div className="empty">Ничего не найдено</div>}
       {filtered && filtered.length > 0 && (
         <div className="grid">
-          {filtered.map(l => <ListingCard key={l.id} listing={l} />)}
+          {filtered.map(l => (
+            <ListingCard
+              key={l.id}
+              listing={l}
+              isFavorited={ids.has(l.id)}
+              onToggleFavorite={toggle}
+            />
+          ))}
         </div>
       )}
     </>

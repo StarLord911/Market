@@ -33,6 +33,15 @@ export const api = {
         .then(handle<Listing>);
     },
   },
+  favorites: {
+    list: (userId: string) =>
+      fetch(`/api/listings/favorites/${userId}`).then(handle<Listing[]>),
+    add: (listingId: string, userId: string) =>
+      fetch(`/api/listings/${listingId}/favorites`, { method: 'POST', headers: json, body: JSON.stringify({ userId }) })
+        .then(handle<void>),
+    remove: (listingId: string, userId: string) =>
+      fetch(`/api/listings/${listingId}/favorites/${userId}`, { method: 'DELETE' }).then(handle<void>),
+  },
   comments: {
     list: (listingId: string) =>
       fetch(`/api/listings/${listingId}/comments`).then(handle<Comment[]>),
