@@ -1,0 +1,40 @@
+@gateway = http://localhost:5000
+
+### Register a user
+POST {{gateway}}/api/users
+Content-Type: application/json
+
+{
+  "username": "vlad",
+  "email": "vlad@example.com"
+}
+
+### List users
+GET {{gateway}}/api/users
+Accept: application/json
+
+### Get a user by id
+GET {{gateway}}/api/users/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+### Create a listing (replace authorId with a real one)
+POST {{gateway}}/api/listings
+Content-Type: application/json
+
+{
+  "authorId": "00000000-0000-0000-0000-000000000000",
+  "title": "iPhone 15 Pro 256GB",
+  "description": "Like new, with original box",
+  "price": 95000
+}
+
+### List listings
+GET {{gateway}}/api/listings
+Accept: application/json
+
+### Get a listing by id
+GET {{gateway}}/api/listings/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+### Delete a listing
+DELETE {{gateway}}/api/listings/00000000-0000-0000-0000-000000000000
