@@ -1,5 +1,6 @@
 using Listings.Api.Consumers;
 using Listings.Api.Data;
+using Listings.Api.Services;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.FileProviders;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ListingsDbContext>(opt =>
-    opt.UseInMemoryDatabase("listings"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddMassTransit(x =>
 {
@@ -29,10 +30,17 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
+builder.Services.AddScoped<IListingsService, ListingsService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ListingsDbContext>();
+    db.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();

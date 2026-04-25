@@ -1,11 +1,12 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Users.Api.Data;
+using Users.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<UsersDbContext>(opt =>
-    opt.UseInMemoryDatabase("users"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddMassTransit(x =>
 {
@@ -20,10 +21,17 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
+builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
+    db.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();

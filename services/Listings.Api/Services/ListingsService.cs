@@ -1,0 +1,107 @@
+using Listings.Api.Data;
+using Listings.Api.Domain;
+using MassTransit;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Shared.Contracts;
+
+namespace Listings.Api.Services;
+
+public class ListingsService : IListingsService
+{
+    private readonly ListingsDbContext _db;
+    private readonly IPublishEndpoint _publisher;
+    private readonly IWebHostEnvironment _env;
+
+    public ListingsService(ListingsDbContext db, IPublishEndpoint publisher, IWebHostEnvironment env)
+    {
+        _db = db;
+        _publisher = publisher;
+        _env = env;
+    }
+
+    public async Task<IEnumerable<ListingDto>> GetAllAsync(string? category, string? q, CancellationToken ct)
+    {
+        var query = _db.Listings.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(category))
+            query = query.Where(l => l.Category == category);
+
+        var items = await query.OrderByDescending(l => l.CreatedAt).ToListAsync(ct);
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            var lower = q.ToLower();
+            items = items.Where(l =>
+                l.Title.ToLower().Contains(lower) ||
+                l.Description.ToLower().Contains(lower)).ToList();
+        }
+
+        return items.Select(ToDto);
+    }
+
+    public async Task<ListingDto?> GetByIdAsync(Guid id, CancellationToken ct)
+    {
+        var l = await _db.Listings.FindAsync(id, ct);
+        return l is null ? null : ToDto(l);
+    }
+
+    public async Task<ListingDto> CreateAsync(CreateListingRequest req, CancellationToken ct)
+    {
+        var category = Categories.All.Contains(req.Category) ? req.Category : "Другое";
+        var entity = new Listing
+        {
+            Id = Guid.NewGuid(),
+            AuthorId = req.AuthorId,
+            Title = req.Title,
+            Description = req.Description,
+            Price = req.Price,
+            Category = category,
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.Listings.Add(entity);
+        await _db.SaveChangesAsync(ct);
+
+        await _publisher.Publish(
+            new ListingCreatedEvent(entity.Id, entity.AuthorId, entity.Title, entity.Price, entity.CreatedAt), ct);
+
+        return ToDto(entity);
+    }
+
+    public async Task<ListingDto?> UploadPhotosAsync(Guid id, IFormFileCollection files, CancellationToken ct)
+    {
+        var l = await _db.Listings.FindAsync(id, ct);
+        if (l is null) return null;
+
+        var uploadsDir = Path.Combine(_env.ContentRootPath, "uploads", id.ToString());
+        Directory.CreateDirectory(uploadsDir);
+
+        var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+
+        foreach (var file in files)
+        {
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowed.Contains(ext)) continue;
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var path = Path.Combine(uploadsDir, fileName);
+            await using var stream = System.IO.File.Create(path);
+            await file.CopyToAsync(stream, ct);
+            l.Photos.Add($"/media/{id}/{fileName}");
+        }
+
+        await _db.SaveChangesAsync(ct);
+        return ToDto(l);
+    }
+
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
+    {
+        var l = await _db.Listings.FindAsync(id, ct);
+        if (l is null) return false;
+        _db.Listings.Remove(l);
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
+    private static ListingDto ToDto(Listing l) =>
+        new(l.Id, l.AuthorId, l.Title, l.Description, l.Price, l.Category, l.CreatedAt, l.Photos);
+}
