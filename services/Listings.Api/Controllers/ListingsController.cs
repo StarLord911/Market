@@ -48,12 +48,22 @@ public class ListingsController : ControllerBase
         if (dto is null) return NotFound();
         return Ok(dto);
     }
-
+   
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         var deleted = await _service.DeleteAsync(id, ct);
         if (!deleted) return NotFound();
         return NoContent();
+    }
+
+    [HttpPatch("{id:guid}")]
+    public async Task<ActionResult<ListingDto>> UpdateListing(Guid id, UpdateListingRequest updateListingRequest, CancellationToken ct)
+    {
+        var updatedDto = await _service.UpdateListingAsync(id, updateListingRequest, ct);
+
+        if (updatedDto is null) return NotFound();
+
+        return Ok(updatedDto);
     }
 }

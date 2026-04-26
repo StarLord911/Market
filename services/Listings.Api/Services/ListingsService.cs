@@ -102,6 +102,28 @@ public class ListingsService : IListingsService
         return true;
     }
 
+    public async Task<ListingDto?> UpdateListingAsync(Guid id, UpdateListingRequest req, CancellationToken ct)
+    {
+        var listing = await _db.Listings.FindAsync(id, ct);
+
+        if (listing == null)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(req.Title)) listing.Title = req.Title;
+        if (!string.IsNullOrEmpty(req.Description)) listing.Description = req.Description;
+        if (req.Price.HasValue) listing.Price = req.Price.Value;
+
+        if (!string.IsNullOrEmpty(req.Category) && Categories.All.Contains(req.Category))
+            listing.Category = req.Category;
+
+        await _db.SaveChangesAsync(ct);
+
+        return ToDto(listing);
+    }
+
     private static ListingDto ToDto(Listing l) =>
         new(l.Id, l.AuthorId, l.Title, l.Description, l.Price, l.Category, l.CreatedAt, l.Photos);
+
 }

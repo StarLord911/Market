@@ -11,6 +11,12 @@ public record ListingDto(
     DateTime CreatedAt,
     IReadOnlyList<string> Photos);
 
+public record UpdateListingRequest(
+    string? Title,
+    string? Description,
+    decimal? Price,
+    string? Category);
+
 // Запрос на создание нового объявления
 public record CreateListingRequest(
     Guid AuthorId,
