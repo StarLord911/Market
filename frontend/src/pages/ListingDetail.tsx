@@ -198,7 +198,12 @@ export default function ListingDetail() {
         )}
 
         <div className="detail-meta">Опубликовано {formatDate(listing.createdAt)}</div>
-        {isOwner && <button className="btn danger" onClick={onDelete}>Удалить</button>}
+        {isOwner && (
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Link to={`/listings/${listing.id}/edit`} className="btn">Редактировать</Link>
+            <button className="btn danger" onClick={onDelete}>Удалить</button>
+          </div>
+        )}
         {error && <div className="error">{error}</div>}
       </div>
     </div>

@@ -26,6 +26,9 @@ export const api = {
         .then(handle<Listing>),
     remove: (id: string) =>
       fetch(`/api/listings/${id}`, { method: 'DELETE' }).then(handle<void>),
+    update: (id: string, data: { title?: string; description?: string; price?: number; category?: string }) =>
+      fetch(`/api/listings/${id}`, { method: 'PATCH', headers: json, body: JSON.stringify(data) })
+        .then(handle<Listing>),
     uploadPhotos: (id: string, files: FileList) => {
       const form = new FormData();
       Array.from(files).forEach(f => form.append('files', f));

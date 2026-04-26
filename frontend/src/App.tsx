@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import UserProfile from './pages/UserProfile';
 import Users from './pages/Users';
 import Favorites from './pages/Favorites';
+import EditListing from './pages/EditListing';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="listings" element={<Listings />} />
           <Route path="listings/new" element={<NewListing />} />
           <Route path="listings/:id" element={<ListingDetail />} />
+          <Route path="listings/:id/edit" element={<EditListing />} />
           <Route path="register" element={<Register />} />
           <Route path="users" element={<Users />} />
           <Route path="users/:id" element={<UserProfile />} />
