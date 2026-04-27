@@ -1,4 +1,4 @@
-import type { Comment, Listing, User } from './types';
+import type { Comment, Listing, ListingsQuery, PagedResult, User } from './types';
 
 const json = { 'Content-Type': 'application/json' };
 
@@ -13,12 +13,18 @@ async function handle<T>(res: Response): Promise<T> {
 
 export const api = {
   listings: {
-    list: (params?: { category?: string; q?: string }) => {
+    list: (params?: ListingsQuery) => {
       const qs = new URLSearchParams();
       if (params?.category) qs.set('category', params.category);
+      if (params?.city) qs.set('city', params.city);
       if (params?.q) qs.set('q', params.q);
+      if (params?.sort) qs.set('sort', params.sort);
+      if (params?.page !== undefined) qs.set('page', String(params.page));
+      if (params?.pageSize !== undefined) qs.set('pageSize', String(params.pageSize));
+      if (params?.minPrice !== undefined) qs.set('minPrice', String(params.minPrice));
+      if (params?.maxPrice !== undefined) qs.set('maxPrice', String(params.maxPrice));
       const query = qs.toString() ? `?${qs}` : '';
-      return fetch(`/api/listings${query}`).then(handle<Listing[]>);
+      return fetch(`/api/listings${query}`).then(handle<PagedResult<Listing>>);
     },
     get: (id: string) => fetch(`/api/listings/${id}`).then(handle<Listing>),
     create: (data: { authorId: string; title: string; description: string; price: number; category: string }) =>

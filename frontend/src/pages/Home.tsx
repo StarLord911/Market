@@ -94,7 +94,9 @@ export default function Home() {
   const { ids, toggle } = useFavorites();
 
   useEffect(() => {
-    api.listings.list().then(setItems).catch(() => setItems([]));
+    api.listings.list({ page: 1, pageSize: 100, sort: 'Newest' })
+      .then(res => setItems(res.items))
+      .catch(() => setItems([]));
   }, []);
 
   const filtered = useMemo(() => {

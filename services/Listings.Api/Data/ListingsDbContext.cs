@@ -15,6 +15,9 @@ public class ListingsDbContext(DbContextOptions<ListingsDbContext> options) : Db
         {
             e.HasKey(l => l.Id);
             e.Property(l => l.Price).HasPrecision(18, 2);
+            e.HasIndex(l => l.CreatedAt);
+            e.HasIndex(l => l.Price);
+            e.HasIndex(l => new { l.Category, l.City });
         });
 
         modelBuilder.Entity<Comment>(e =>

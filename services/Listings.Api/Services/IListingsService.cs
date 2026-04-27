@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Http;
 using Shared.Contracts;
+using Shared.Contracts.Api;
 
 namespace Listings.Api.Services;
 
 public interface IListingsService
 {
-    Task<IEnumerable<ListingDto>> GetAllAsync(string? category, string? q, string? city, CancellationToken ct);
+    Task<PagedResult<ListingDto>> GetAllAsync(ListingsQuery listingsQuery, CancellationToken ct);
     Task<ListingDto?> GetByIdAsync(Guid id, CancellationToken ct);
     Task<ListingDto> CreateAsync(CreateListingRequest req, CancellationToken ct);
     Task<ListingDto?> UploadPhotosAsync(Guid id, IFormFileCollection files, CancellationToken ct);

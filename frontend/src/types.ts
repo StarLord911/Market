@@ -28,6 +28,26 @@ export type Comment = {
   createdAt: string;
 };
 
+export type ListingsSort = 'Newest' | 'PriceAsc' | 'PriceDesc';
+
+export type ListingsQuery = {
+  page?: number;
+  pageSize?: number;
+  sort?: ListingsSort;
+  minPrice?: number;
+  maxPrice?: number;
+  category?: string;
+  city?: string;
+  q?: string;
+};
+
+export type PagedResult<T> = {
+  items: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+};
+
 export type CurrentUser = {
   id: string;
   username: string;

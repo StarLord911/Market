@@ -1,6 +1,7 @@
 using Listings.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Contracts;
+using Shared.Contracts.Api;
 
 namespace Listings.Api.Controllers;
 
@@ -16,10 +17,25 @@ public class ListingsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ListingDto>>> GetAll(
-        [FromQuery] string? category, [FromQuery] string? q, [FromQuery] string? city, CancellationToken ct)
+    public async Task<ActionResult<PagedResult<ListingDto>>> GetAll([FromQuery] ListingsQuery listingsQuery,  CancellationToken ct)
     {
-        var items = await _service.GetAllAsync(category, q, city, ct);
+        if (listingsQuery.Page < 1)
+            return BadRequest(new { error = "Page must be greater than or equal to 1." });
+
+        if (listingsQuery.PageSize is < 1 or > 100)
+            return BadRequest(new { error = "PageSize must be between 1 and 100." });
+
+        if (listingsQuery.MinPrice.HasValue && listingsQuery.MinPrice.Value < 0)
+            return BadRequest(new { error = "MinPrice must be non-negative." });
+
+        if (listingsQuery.MaxPrice.HasValue && listingsQuery.MaxPrice.Value < 0)
+            return BadRequest(new { error = "MaxPrice must be non-negative." });
+
+        if (listingsQuery.MinPrice.HasValue && listingsQuery.MaxPrice.HasValue &&
+            listingsQuery.MinPrice.Value > listingsQuery.MaxPrice.Value)
+            return BadRequest(new { error = "MinPrice cannot be greater than MaxPrice." });
+
+        var items = await _service.GetAllAsync(listingsQuery, ct);
         return Ok(items);
     }
 

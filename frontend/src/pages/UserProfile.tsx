@@ -26,8 +26,8 @@ export default function UserProfile() {
       setPhone(u.phone ?? '');
       setTelegram(u.telegram ?? '');
     }).catch(() => setUser(null));
-    api.listings.list()
-      .then(all => setListings(all.filter(l => l.authorId === id)))
+    api.listings.list({ page: 1, pageSize: 100, sort: 'Newest' })
+      .then(res => setListings(res.items.filter(l => l.authorId === id)))
       .catch(() => setListings([]));
   }, [id]);
 

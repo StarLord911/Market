@@ -4,6 +4,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Contracts;
+using Shared.Contracts.Api;
 
 namespace Listings.Api.Services;
 
@@ -20,30 +21,55 @@ public class ListingsService : IListingsService
         _env = env;
     }
 
-    public async Task<IEnumerable<ListingDto>> GetAllAsync(string? category, string? q, string? city, CancellationToken ct)
+    public async Task<PagedResult<ListingDto>> GetAllAsync(ListingsQuery listingsQuery, CancellationToken ct)
     {
-        var query = _db.Listings.AsQueryable();
+        var query = _db.Listings
+            .AsNoTracking()
+            .AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(category))
-            query = query.Where(l => l.Category == category);
+        if (!string.IsNullOrWhiteSpace(listingsQuery.Category))
+            query = query.Where(l => l.Category == listingsQuery.Category);
 
-        if (!string.IsNullOrWhiteSpace(city))
-            query = query.Where(l => l.City == city);
+        if (!string.IsNullOrWhiteSpace(listingsQuery.City))
+            query = query.Where(l => l.City == listingsQuery.City);
 
+        if (listingsQuery.MinPrice.HasValue)
+            query = query.Where(l => l.Price >= listingsQuery.MinPrice.Value);
 
-        if (!string.IsNullOrWhiteSpace(q))
+        if (listingsQuery.MaxPrice.HasValue)
+            query = query.Where(l => l.Price <= listingsQuery.MaxPrice.Value);
+
+        if (!string.IsNullOrWhiteSpace(listingsQuery.Q))
         {
-            q = q.Trim();
+            var search = listingsQuery.Q.Trim();
             query = query.Where(l =>
-                EF.Functions.Like(l.Title, $"%{q}%") ||
-                EF.Functions.Like(l.Description, $"%{q}%"));
+                EF.Functions.Like(l.Title, $"%{search}%") ||
+                EF.Functions.Like(l.Description, $"%{search}%"));
         }
 
-        var items = await query
-            .OrderByDescending(l => l.CreatedAt)
-            .ToListAsync(ct);
+        switch (listingsQuery.Sort)
+        {
+            case ListingsSort.Newest:
+                query = query.OrderByDescending(l => l.CreatedAt);
+                break;
+            case ListingsSort.PriceDesc:
+                query = query.OrderByDescending(l => l.Price);
+                break;
+            case ListingsSort.PriceAsc:
+                query = query.OrderBy(l => l.Price);
+                break;
+        }
 
-        return items.Select(ToDto);
+        var total = await query.CountAsync(ct);
+
+        var items = await query.Skip((listingsQuery.Page - 1) * listingsQuery.PageSize)
+            .Take(listingsQuery.PageSize).ToListAsync(ct);
+
+        return new PagedResult<ListingDto>(
+            items.Select(ToDto).ToList(),
+            listingsQuery.Page,
+            listingsQuery.PageSize,
+            total);
     }
 
     public async Task<ListingDto?> GetByIdAsync(Guid id, CancellationToken ct)

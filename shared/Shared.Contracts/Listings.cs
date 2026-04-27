@@ -19,6 +19,16 @@ public record UpdateListingRequest(
     string? Category,
     string? City);
 
+public record ListingsQuery(
+    int Page = 1,
+    int PageSize = 20,
+    ListingsSort Sort = ListingsSort.Newest,
+    decimal? MinPrice = null,
+    decimal? MaxPrice = null,
+    string? Category = null,
+    string? City = null,
+    string? Q = null);
+
 // Запрос на создание нового объявления
 public record CreateListingRequest(
     Guid AuthorId,
@@ -45,3 +55,10 @@ public record CreateCommentRequest(
 
 // Запрос на добавление объявления в избранное
 public record AddFavoriteRequest(Guid UserId);
+
+public enum ListingsSort
+{
+    Newest,
+    PriceAsc,
+    PriceDesc
+}

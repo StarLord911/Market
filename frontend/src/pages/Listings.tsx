@@ -1,45 +1,60 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import ListingCard from '../components/ListingCard';
 import { useFavorites } from '../hooks/useFavorites';
-import type { Listing } from '../types';
+import type { Listing, ListingsSort, PagedResult } from '../types';
 import { CATEGORIES } from '../types';
 
 export default function Listings() {
-  const [items, setItems] = useState<Listing[] | null>(null);
+  const [result, setResult] = useState<PagedResult<Listing> | null>(null);
   const [params, setParams] = useSearchParams();
   const { ids, toggle } = useFavorites();
-  const q = params.get('q')?.toLowerCase() ?? '';
+  const q = params.get('q') ?? '';
   const activeCategory = params.get('category') ?? '';
+  const page = Math.max(1, Number(params.get('page') ?? '1') || 1);
+  const sort = (params.get('sort') as ListingsSort | null) ?? 'Newest';
+  const pageSize = 24;
 
   useEffect(() => {
-    api.listings.list().then(setItems).catch(() => setItems([]));
-  }, []);
-
-  const filtered = useMemo(() => {
-    if (!items) return null;
-    return items.filter(l => {
-      const matchCat = !activeCategory || l.category === activeCategory;
-      const matchQ = !q || l.title.toLowerCase().includes(q) || l.description.toLowerCase().includes(q);
-      return matchCat && matchQ;
-    });
-  }, [items, q, activeCategory]);
+    api.listings.list({
+      page,
+      pageSize,
+      sort,
+      category: activeCategory || undefined,
+      q: q || undefined,
+    })
+      .then(setResult)
+      .catch(() => setResult({ items: [], page, pageSize, total: 0 }));
+  }, [activeCategory, page, q, sort]);
 
   const setCategory = (cat: string) => {
     setParams(prev => {
       const next = new URLSearchParams(prev);
-      if (cat) next.set('category', cat); else next.delete('category');
+      if (cat) next.set('category', cat);
+      else next.delete('category');
+      next.delete('page');
       return next;
     });
   };
+
+  const setPage = (nextPage: number) => {
+    setParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (nextPage <= 1) next.delete('page');
+      else next.set('page', String(nextPage));
+      return next;
+    });
+  };
+
+  const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1;
 
   return (
     <>
       <div className="page-head">
         <div>
           <h1>{q ? `Поиск: «${q}»` : activeCategory || 'Все объявления'}</h1>
-          {filtered && <div className="count">{filtered.length} {pluralize(filtered.length)}</div>}
+          {result && <div className="count">{result.total} {pluralize(result.total)}</div>}
         </div>
       </div>
 
@@ -52,11 +67,11 @@ export default function Listings() {
         ))}
       </div>
 
-      {filtered === null && <div className="loading-page"><span className="spinner" /></div>}
-      {filtered?.length === 0 && <div className="empty">Ничего не найдено</div>}
-      {filtered && filtered.length > 0 && (
+      {result === null && <div className="loading-page"><span className="spinner" /></div>}
+      {result?.items.length === 0 && <div className="empty">Ничего не найдено</div>}
+      {result && result.items.length > 0 && (
         <div className="grid">
-          {filtered.map(l => (
+          {result.items.map(l => (
             <ListingCard
               key={l.id}
               listing={l}
@@ -66,13 +81,28 @@ export default function Listings() {
           ))}
         </div>
       )}
+
+      {result && totalPages > 1 && (
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 24 }}>
+          <button className="btn ghost sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>
+            Назад
+          </button>
+          <span className="meta" style={{ alignSelf: 'center' }}>
+            {page} / {totalPages}
+          </span>
+          <button className="btn ghost sm" onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
+            Вперёд
+          </button>
+        </div>
+      )}
     </>
   );
 }
 
 function pluralize(n: number) {
-  const mod10 = n % 10, mod100 = n % 100;
+  const mod10 = n % 10;
+  const mod100 = n % 100;
   if (mod10 === 1 && mod100 !== 11) return 'объявление';
-  if ([2,3,4].includes(mod10) && ![12,13,14].includes(mod100)) return 'объявления';
+  if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return 'объявления';
   return 'объявлений';
 }
