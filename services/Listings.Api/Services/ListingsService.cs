@@ -30,15 +30,18 @@ public class ListingsService : IListingsService
         if (!string.IsNullOrWhiteSpace(city))
             query = query.Where(l => l.City == city);
 
-        var items = await query.OrderByDescending(l => l.CreatedAt).ToListAsync(ct);
 
         if (!string.IsNullOrWhiteSpace(q))
         {
-            var lower = q.ToLower();
-            items = items.Where(l =>
-                l.Title.ToLower().Contains(lower) ||
-                l.Description.ToLower().Contains(lower)).ToList();
+            q = q.Trim();
+            query = query.Where(l =>
+                EF.Functions.Like(l.Title, $"%{q}%") ||
+                EF.Functions.Like(l.Description, $"%{q}%"));
         }
+
+        var items = await query
+            .OrderByDescending(l => l.CreatedAt)
+            .ToListAsync(ct);
 
         return items.Select(ToDto);
     }
