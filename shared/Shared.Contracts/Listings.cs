@@ -9,13 +9,15 @@ public record ListingDto(
     decimal Price,
     string Category,
     DateTime CreatedAt,
+    string City,
     IReadOnlyList<string> Photos);
 
 public record UpdateListingRequest(
     string? Title,
     string? Description,
     decimal? Price,
-    string? Category);
+    string? Category,
+    string? City);
 
 // Запрос на создание нового объявления
 public record CreateListingRequest(
@@ -23,7 +25,8 @@ public record CreateListingRequest(
     string Title,
     string Description,
     decimal Price,
-    string Category);
+    string Category,
+    string City);
 
 // DTO комментария к объявлению
 public record CommentDto(

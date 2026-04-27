@@ -5,6 +5,7 @@ export type Listing = {
   description: string;
   price: number;
   category: string;
+  city: string;
   createdAt: string;
   photos: string[];
 };

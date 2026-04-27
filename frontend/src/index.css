@@ -10,7 +10,7 @@
   --accent-hover: #0a4cd1;
   --danger: #d83a3a;
   --radius: 12px;
-  --max-w: 1240px;
+  --max-w: 1100px;
 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--text);

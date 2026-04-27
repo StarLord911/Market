@@ -20,12 +20,15 @@ public class ListingsService : IListingsService
         _env = env;
     }
 
-    public async Task<IEnumerable<ListingDto>> GetAllAsync(string? category, string? q, CancellationToken ct)
+    public async Task<IEnumerable<ListingDto>> GetAllAsync(string? category, string? q, string? city, CancellationToken ct)
     {
         var query = _db.Listings.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(category))
             query = query.Where(l => l.Category == category);
+
+        if (!string.IsNullOrWhiteSpace(city))
+            query = query.Where(l => l.City == city);
 
         var items = await query.OrderByDescending(l => l.CreatedAt).ToListAsync(ct);
 
@@ -57,7 +60,8 @@ public class ListingsService : IListingsService
             Description = req.Description,
             Price = req.Price,
             Category = category,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            City = req.City,
         };
         _db.Listings.Add(entity);
         await _db.SaveChangesAsync(ct);
@@ -114,6 +118,7 @@ public class ListingsService : IListingsService
         if (!string.IsNullOrEmpty(req.Title)) listing.Title = req.Title;
         if (!string.IsNullOrEmpty(req.Description)) listing.Description = req.Description;
         if (req.Price.HasValue) listing.Price = req.Price.Value;
+        if (!string.IsNullOrEmpty(req.City)) listing.City = req.City;
 
         if (!string.IsNullOrEmpty(req.Category) && Categories.All.Contains(req.Category))
             listing.Category = req.Category;
@@ -124,6 +129,6 @@ public class ListingsService : IListingsService
     }
 
     private static ListingDto ToDto(Listing l) =>
-        new(l.Id, l.AuthorId, l.Title, l.Description, l.Price, l.Category, l.CreatedAt, l.Photos);
+        new(l.Id, l.AuthorId, l.Title, l.Description, l.Price, l.Category, l.CreatedAt, l.City, l.Photos);
 
 }

@@ -49,5 +49,5 @@ public class FavoritesService : IFavoritesService
     }
 
     private static ListingDto ToDto(Listing l) =>
-        new(l.Id, l.AuthorId, l.Title, l.Description, l.Price, l.Category, l.CreatedAt, l.Photos);
+        new(l.Id, l.AuthorId, l.Title, l.Description, l.Price, l.Category, l.CreatedAt, l.City, l.Photos);
 }

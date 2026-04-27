@@ -21,6 +21,9 @@ public class Listing
     // Категория — должна совпадать с одним из значений в Categories.All
     public string Category { get; set; } = "Другое";
 
+    //Город
+    public string City { get; set; } = "Другое";
+
     // Дата и время публикации (UTC)
     public DateTime CreatedAt { get; set; }
 

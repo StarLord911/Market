@@ -17,9 +17,9 @@ public class ListingsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ListingDto>>> GetAll(
-        [FromQuery] string? category, [FromQuery] string? q, CancellationToken ct)
+        [FromQuery] string? category, [FromQuery] string? q, [FromQuery] string? city, CancellationToken ct)
     {
-        var items = await _service.GetAllAsync(category, q, ct);
+        var items = await _service.GetAllAsync(category, q, city, ct);
         return Ok(items);
     }
 
